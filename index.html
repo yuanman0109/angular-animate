@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      .bt-wrapper{
+        position: absolute;
+        right:0;
+        top: 0;
+      }
+      .btn{
+        margin-top: 20px;
+      }
+      .ball{
+        position: fixed;
+        left: 0;
+        bottom: 0;
+      }
+      .ball .inner{
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: red;
+      }
+      .maroon-setting .inner{
+        transition:all 0.4s linear;
+        transform: translate3d(0,0,0)!important
+      }
+      .box{
+        height: 800px;
+        position: relative;
+        background: #ccc;
+      }
+    </style>
+  </head>
+  <body ng-app="app" ng-controller="myController">
+    <div class="box">
+      <div class="ball" ng-repeat="item in lists" ng-if="item.show" data-el='item.el'>
+        <div class="inner"></div>
+      </div>
+      <div class="bt-wrapper">
+        <div ng-repeat="item in bts"><button ng-click="move($event)" class="btn" >click</button></div>
+      </div>
+    </div>
+    <script src="https://cdn.bootcss.com/angular.js/1.6.4/angular.min.js"></script>
+    <script src="https://cdn.bootcss.com/angular.js/1.6.4/angular-animate.min.js"></script>
+    <script>
+      var app = angular.module('app', ['ngAnimate']);
+      app.controller('myController', ['$scope','$animate','$rootScope',function ($scope,$animate,$rootScope) {
+          $rootScope.lists=[
+            {
+              show:true
+            }
+          ];
+          $scope.bts=[
+            1,2,3,4,5,6
+          ];
+          $scope.move=function(event){
+            $rootScope.rect=event.target.getBoundingClientRect();
+            $rootScope.lists.push({
+              show:true,
+            });
+          }
+      }]);
+      app.animation('.ball', ['$animateCss','$rootScope',function($animateCss,$rootScope) {
+        return {
+          enter: function(element, doneFn) {
+            var y = -(window.innerHeight-$rootScope.rect.top);
+            var x = $rootScope.rect.left;
+            var inner = element[0].querySelectorAll('.inner')[0];
+            inner.style.transform=`translate3d(${x}px,0,0)`;
+            var animation=$animateCss(element, {
+              addClass: 'maroon-setting',
+              //easing: 'ease-in',//缓动值
+              transitionStyle:'all 0.4s cubic-bezier(0.49,-0.29,0.75,0.41)',
+              from: { transform:`translate3d(0,${y}px,0)` },
+              to: { transform:'translate3d(0,0,0)' },
+              //duration: 0.4, // 动画执行时间
+              cleanupStyles:false//执行完毕后是否清楚样式
+            });
+            animation.start().done(function(){
+              $rootScope.lists.shift();
+              //console.log($rootScope.lists)
+            });
+          }
+        }
+      }]);
+    </script>
+  </body>
+</html>
